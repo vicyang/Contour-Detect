@@ -13,38 +13,37 @@ BEGIN
     our $HEIGHT = 500;
     our $WIDTH  = 500;
     our ($rx, $ry, $rz) = (0.0, 0.0, 0.0);
+}
 
+INIT:
+{
     ' Load picture ';
+
     my $file = "sample.jpg"; 
-
     our $img = Imager->new();
-    $img->read(file=>$file)
-      or die "Cannot load $image_source: ", $image->errstr;
-
-    our ($H, $W) = ($img->getheight(), $img->getwidth());
+    our ($H, $W);
+    our @cv = (1.0, 2.0, 1.0);
+    
+    $img->read(file=>$file) or die "Cannot load image: ", $image->errstr;
+    ($H, $W) = ($img->getheight(), $img->getwidth());
     printf "width: %d, height: %d\n", $W, $H;
-
-    $img->filter(type=>"conv", coef=>[ 0.01, 0.1, 0.01 ]);
 
     our @verts;
     our @colors;
     our $vtx_n = $W * $H;
-}
 
-INIT
-{
-    load_pixels();
+    update();
 }
 
 &main();
 
 sub display
 {
+    our $img2;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
-
     my $verts  = OpenGL::Array->new_list( GL_FLOAT, @verts );
     my $colors = OpenGL::Array->new_list( GL_FLOAT, @colors );
 
@@ -62,7 +61,7 @@ sub display
 
 sub idle 
 {
-    sleep 0.02;
+    sleep 0.05;
     glutPostRedisplay();
 }
 
@@ -94,6 +93,15 @@ sub hitkey
     our $WinID;
     my $k = lc(chr(shift));
     if ( $k eq 'q') { quit() }
+    if ( $k eq '4') { $cv[0]+=0.2; update(); }
+    if ( $k eq '5') { $cv[1]+=0.2; update(); }
+    if ( $k eq '6') { $cv[2]+=0.2; update(); }
+
+    if ( $k eq '1') { $cv[0]-=0.2; update(); }
+    if ( $k eq '2') { $cv[1]-=0.2; update(); }
+    if ( $k eq '3') { $cv[2]-=0.2; update(); }
+
+    printf "Coeffiction: %.2f %.2f %.2f\n", $cv[0],$cv[1],$cv[2];
 }
 
 sub quit
@@ -120,27 +128,32 @@ sub main
     glutMainLoop();
 }
 
+sub update
+{
+    $img2 = $img->copy();
+    $img2->filter(type=>"conv", coef=>[ @cv ]);
+    load_pixels( $img2, $W, $H );
+}
+
 sub load_pixels
 {
+    my ($img, $W, $H) = @_;
+    my @rgba_arr;
+    my ($r, $g, $b, $y, $x);
+
     our @colors;
     our @verts;
-    our ($H,$W);
     @colors = ();
     @verts = ();
 
-    my @rgba_arr;
-    my ($r, $g, $b);
-    my $ta = time();
-    print "pushing to array ... ";
-    for my $y ( 0 .. $H-1 )
+    for $y ( 0 .. $H-1 )
     {
         @rgba_arr = $img->getscanline(y=>$y);
-        for my $x ( 0 .. $W-1 )
+        for $x ( 0 .. $W-1 )
         {
             ($r, $g, $b) = ($rgba_arr[$x]->rgba)[0,1,2];
             push @colors, $r/255.0, $g/255.0, $b/255.0;
             push @verts, ( $x, $H-$y, 0.0 );
         }
     }
-    printf "Done %.3f\n", time()-$ta;
 }
