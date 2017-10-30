@@ -39,14 +39,13 @@ INIT:
 
 sub display
 {
-    our $img2;
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
+
     my $verts  = OpenGL::Array->new_list( GL_FLOAT, @verts );
     my $colors = OpenGL::Array->new_list( GL_FLOAT, @colors );
-
     # 分量，类型，间隔，指针
     glVertexPointer_c(3, GL_FLOAT, 0, $verts->ptr);
     glColorPointer_c( 3, GL_FLOAT, 0, $colors->ptr);
@@ -61,8 +60,16 @@ sub display
 
 sub idle 
 {
-    sleep 0.05;
-    glutPostRedisplay();
+    state $ta;
+    state $tb;
+
+    $ta = time();
+    sleep 0.02;
+
+    display();
+
+    $tb = time();
+    printf "%.4f\n", $tb-$ta;
 }
 
 sub init
