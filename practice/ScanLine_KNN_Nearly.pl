@@ -37,14 +37,34 @@ INIT:
     our $verts  = OpenGL::Array->new_list( GL_FLOAT, @verts );
     our $colors = OpenGL::Array->new_list( GL_FLOAT, @colors );
     our @edges;
+
+    our $xi, $yi;
+    $yi = int($H/2);
+    scan_first_edge();
+
+    sub scan_first_edge
+    {
+        my @prev, @curr, $k;
+        for my $x ( 1 .. $W-1 )
+        {
+            @prev = @{$mat->[$yi][$x-1]};
+            @curr = @{$mat->[$yi][$x]};
+            $k = sqrt(($curr[0]-$prev[0])**2 + ($curr[1]-$prev[1])**2 + ($curr[2]-$prev[2])**2);
+            if ( $k > 80.0) {
+                push @edges, [$x, $yi, 1.0];
+                printf "edge: y: %d x: %d, k: %.3f\n", $yi, $x, $k;
+                $xi = $x;
+                return;
+            }
+        }
+    }
 }
 
 &main();
 
 sub display
 {
-    state $xi = 0.0;
-    state $yi = $H/2.0;
+    our ($xi, $yi);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glPointSize(1.0);
@@ -60,7 +80,7 @@ sub display
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 
-    glPointSize(4.0);
+    glPointSize(5.0);
     glColor3f(1.0, 0.0,0.0);
     glBegin(G_POINTS);
     glVertex3f($xi, $yi, 1.0);
@@ -70,26 +90,9 @@ sub display
     }
     glEnd();
     # printf "x:%d : %.2f %.2f %.2f\n", $xi, @{$mat->[$yi][$xi]};
-    
-    #get block
-    my $block = [[]];
-    my $sum = 0.0;
-    my $far = 3;
 
-    if ($xi > 1)
-    {
-        my @prev = @{$mat->[$yi][$xi-1]};
-        my @curr = @{$mat->[$yi][$xi]};
-        my $product = sqrt(($curr[0]-$prev[0])**2 + ($curr[1]-$prev[1])**2 + ($curr[2]-$prev[2])**2);
+    #scan next point
 
-        if ($product > 80.0) {
-            push @edges, [$xi, $yi, 1.0];
-        }
-        #printf "%-3d ", $block->[$my+2][$mx+2];
-        printf "%03d %.3f\n", $xi, $product;
-    }
-
-    $xi+=1.0 if $xi < $W-1;
 
     glutSwapBuffers();
 }
@@ -172,6 +175,7 @@ sub load_pixels
     our @verts;
     @colors = ();
     @verts = ();
+    my $tv;
 
     for $y ( 0 .. $H-1 )
     {
@@ -179,10 +183,13 @@ sub load_pixels
         for $x ( 0 .. $W-1 )
         {
             ($r, $g, $b) = ($rgba_arr[$x]->rgba)[0,1,2];
-            push @colors, $r/255.0, $g/255.0, $b/255.0;
+            #三色平均，转灰度
+            $tv = ($r+$g+$b)/3.0;
+            push @colors, $tv/255.0, $tv/255.0, $tv/255.0;
             push @verts, ( $x, $H-$y, 0.0 );
-            $mat->[$y][$x] = [$r, $g, $b];
 
+            #实际rgb三个向量相同
+            $mat->[$y][$x] = [$tv, $tv, $tv];
             $hash->{"$r $g $b"} += 1;
         }
     }

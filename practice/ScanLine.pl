@@ -20,12 +20,12 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "sample.jpg"; 
+    my $file = "../sample.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     our @cv = (1.0, 2.0, 1.0);
     
-    $img->read(file=>$file) or die "Cannot load image: ", $image->errstr;
+    $img->read(file=>$file) or die "Cannot load image: ", $img->errstr;
     ($H, $W) = ($img->getheight(), $img->getwidth());
     printf "width: %d, height: %d\n", $W, $H;
 
