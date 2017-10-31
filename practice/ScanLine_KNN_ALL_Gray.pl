@@ -46,16 +46,29 @@ INIT:
     {
         my $prev, $curr, $k, $y;
         $y = $yi;
-        for my $x ( 1 .. $W-1 )
+        for my $y ( 1 .. $H-1 )
         {
-            $prev = $mat->[$y][$x-1][0];
-            $curr = $mat->[$y][$x][0];
-            $k = abs($curr-$prev);
-            if ( $k > 30.0) {
-                push @edges, [$x, $H-$y, 1.0];
-                printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
-                $xi = $x;
-                return;
+            for my $x ( 1 .. $W-1 )
+            {
+                $prev = $mat->[$y][$x-1][0];
+                $curr = $mat->[$y][$x][0];
+                $k = abs($curr-$prev);
+                if ( $k > 100.0) {
+                    push @edges, [$x, $H-$y, 1.0];
+                    printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
+                    $xi = $x;
+                    #return;
+                }
+
+                $prev = $mat->[$y-1][$x][0];
+                $curr = $mat->[$y][$x][0];
+                $k = abs($curr-$prev);
+                if ( $k > 30.0) {
+                    push @edges, [$x, $H-$y, 1.0];
+                    printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
+                    $xi = $x;
+                    #return;
+                }
             }
         }
     }

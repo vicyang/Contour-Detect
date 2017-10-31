@@ -44,18 +44,31 @@ INIT:
 
     sub scan_first_edge
     {
-        my $prev, $curr, $k, $y;
+        my @prev, @curr, $k, $y;
         $y = $yi;
-        for my $x ( 1 .. $W-1 )
+        for my $y ( 1 .. $H-1 )
         {
-            $prev = $mat->[$y][$x-1][0];
-            $curr = $mat->[$y][$x][0];
-            $k = abs($curr-$prev);
-            if ( $k > 30.0) {
-                push @edges, [$x, $H-$y, 1.0];
-                printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
-                $xi = $x;
-                return;
+            for my $x ( 1 .. $W-1 )
+            {
+                @prev = @{$mat->[$y][$x-1]};
+                @curr = @{$mat->[$y][$x]};
+                $k = sqrt(($curr[0]-$prev[0])**2 + ($curr[1]-$prev[1])**2 + ($curr[2]-$prev[2])**2);
+                if ( $k > 100.0) {
+                    push @edges, [$x, $H-$y, 1.0];
+                    printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
+                    $xi = $x;
+                    #return;
+                }
+
+                @prev = @{$mat->[$y-1][$x]};
+                @curr = @{$mat->[$y][$x]};
+                $k = sqrt(($curr[0]-$prev[0])**2 + ($curr[1]-$prev[1])**2 + ($curr[2]-$prev[2])**2);
+                if ( $k > 50.0) {
+                    push @edges, [$x, $H-$y, 1.0];
+                    printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
+                    $xi = $x;
+                    #return;
+                }
             }
         }
     }
@@ -184,7 +197,6 @@ sub load_pixels
     our @verts;
     @colors = ();
     @verts = ();
-    my $tv;
 
     for $y ( 0 .. $H-1 )
     {
@@ -192,14 +204,9 @@ sub load_pixels
         for $x ( 0 .. $W-1 )
         {
             ($r, $g, $b) = ($rgba_arr[$x]->rgba)[0,1,2];
-            #三色平均，转灰度
-            $tv = ($r+$g+$b)/3.0;
-            push @colors, $tv/255.0, $tv/255.0, $tv/255.0;
+            push @colors, $r/255.0, $g/255.0, $b/255.0;
             push @verts, ( $x, $H-$y, 0.0 );
-
-            #实际rgb三个向量相同
-            $mat->[$y][$x] = [$tv, $tv, $tv];
-            $hash->{"$r $g $b"} += 1;
+            $mat->[$y][$x] = [$r, $g, $b];
         }
     }
 
