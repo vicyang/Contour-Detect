@@ -2,6 +2,7 @@ use feature 'state';
 use IO::Handle;
 use Imager;
 use List::Util;
+use File::Slurp;
 use Time::HiRes qw/sleep time/;
 use OpenGL qw/ :all /;
 use OpenGL::Config;
@@ -20,7 +21,7 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "../sample.jpg"; 
+    my $file = "../sample2.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     
@@ -45,32 +46,47 @@ INIT:
     sub scan_first_edge
     {
         my $prev, $curr, $k, $y;
-        $y = $yi;
-        for my $y ( 1 .. $H-1 )
-        {
-            for my $x ( 1 .. $W-1 )
-            {
-                $prev = $mat->[$y][$x-1][0];
-                $curr = $mat->[$y][$x][0];
-                $k = abs($curr-$prev);
-                if ( $k > 100.0) {
-                    push @edges, [$x, $H-$y, 1.0];
-                    printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
-                    $xi = $x;
-                    #return;
-                }
+        my ($cy, $cx) = ( int($H/2), int($W/2) );
+        my $ang = 0.0;
 
-                $prev = $mat->[$y-1][$x][0];
+        my $point;
+        my ($x, $y, $len);
+
+        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.1 )
+        {
+            $len = 0.0;
+            $point = undef;
+            $prev = $mat->[$cy][$cx][0];
+            $x = $cx;
+            $y = $cy;
+
+            while ( $x < $W-1 and $y < $H-1 and $x > 0 and $y > 0 )
+            {
+                $len += 1.0;
+                $x = $cx + $len * cos( $ang );
+                $y = $cy + $len * sin( $ang );
                 $curr = $mat->[$y][$x][0];
                 $k = abs($curr-$prev);
-                if ( $k > 30.0) {
-                    push @edges, [$x, $H-$y, 1.0];
-                    printf "edge: y: %d x: %d, k: %.3f\n", $y, $x, $k;
-                    $xi = $x;
-                    #return;
+                #print "$x, $y, $k\n";
+                if ( $k > 30.0 )
+                {
+                    $point = [$x, $H-$y, 1.0];
                 }
+                $prev = $mat->[$y][$x][0];
+            }
+
+            ' get last point ';
+            if ( defined $point )
+            {
+                push @edges, $point;
+            }
+            else 
+            {
+                print "did not find edge\n";
             }
         }
+
+        export_svg( \@edges );
     }
 }
 
@@ -96,25 +112,14 @@ sub display
 
     glPointSize(5.0);
     glColor3f(1.0, 0.0,0.0);
-    glBegin(G_POINTS);
-    glVertex3f($xi, $yi, 1.0);
+
+    glBegin(GL_POINTS);
     for my $e ( @edges )
     {
         glVertex3f( @$e );
     }
     glEnd();
     # printf "x:%d : %.2f %.2f %.2f\n", $xi, @{$mat->[$yi][$xi]};
-
-    #scan next point
-    my $ever;
-    for my $y (-1 .. 1)
-    {
-        for my $x (-1 .. 1)
-        {
-            $ever->[$y+1][$x+1] = $mat->[$yi+$y][$xi+$x][0];
-        }
-    }
-
 
     glutSwapBuffers();
 }
@@ -138,6 +143,7 @@ sub init
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
     glPointSize(1.0);
+    glLineWidth(1.0);
 }
 
 sub reshape
@@ -220,3 +226,38 @@ sub load_pixels
     print $sort_key[0] ,"\n";
     print $sort_key[$#sort_key] ,"\n";
 }
+
+sub export_svg
+{
+    my $pts = shift;
+    my $head = '<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">';
+    my $body = '<polyline points="';
+
+    for my $i ( 0 .. $#$pts )
+    {
+        $body .= sprintf "%d,%d ", $pts->[$i][0], $H - $pts->[$i][1];
+    }
+    $body .= '" style="fill:none;stroke:red;stroke-width:2"/>';
+
+    my $end = '</svg>';
+
+    write_file("contour.svg", join("\n", $head, $body, $end) );
+}
+
+# sub export_svg
+# {
+#     my $pts = shift;
+#     my $head = '<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">';
+#     my $body = '<path d="';
+
+#     $body .= sprintf "M%d %d ", $pts->[0][0], $H - $pts->[0][1];
+#     for my $i ( 1 .. $#$pts )
+#     {
+#         $body .= sprintf "L%d %d ", $pts->[$i][0], $H - $pts->[$i][1];
+#     }
+#     $body .= 'Z"/>';
+
+#     my $end = '</svg>';
+
+#     write_file("contour.svg", join("\n", $head, $body, $end) );
+# }

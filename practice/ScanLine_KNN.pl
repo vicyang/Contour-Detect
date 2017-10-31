@@ -62,7 +62,7 @@ sub display
 
     glPointSize(4.0);
     glColor3f(1.0, 0.0,0.0);
-    glBegin(G_POINTS);
+    glBegin(GL_POINTS);
     glVertex3f($xi, $yi, 1.0);
     for my $e ( @edges )
     {

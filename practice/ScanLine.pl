@@ -73,7 +73,7 @@ sub display
 
     glPointSize(4.0);
     glColor3f(1.0, 0.0,0.0);
-    glBegin(G_POINTS);
+    glBegin(GL_POINTS);
     glVertex3f($xi, $yi, 1.0);
     glEnd();
     # printf "x:%d : %.2f %.2f %.2f\n", $xi, @{$mat->[$yi][$xi]};
