@@ -23,7 +23,6 @@ INIT:
     my $file = "../sample.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
-    our @cv = (1.0, 2.0, 1.0);
     
     $img->read(file=>$file) or die "Cannot load image: ", $img->errstr;
     ($H, $W) = ($img->getheight(), $img->getwidth());
@@ -37,15 +36,6 @@ INIT:
     #only get list in once
     our $verts  = OpenGL::Array->new_list( GL_FLOAT, @verts );
     our $colors = OpenGL::Array->new_list( GL_FLOAT, @colors );
-
-    our $volumn = [
-        [0.1, 0.3, 0.4, 0.3, 0.1],
-        [0.3, 0.6, 0.8, 0.6, 0.3],
-        [0.4, 0.8, 1.0, 0.8, 0.4],
-        [0.3, 0.6, 0.8, 0.6, 0.3],
-        [0.1, 0.3, 0.4, 0.3, 0.1],
-    ];
-
     our @edges;
 }
 
@@ -146,15 +136,6 @@ sub hitkey
     our $WinID;
     my $k = lc(chr(shift));
     if ( $k eq 'q') { quit() }
-    if ( $k eq '4') { $cv[0]+=0.2; update(); }
-    if ( $k eq '5') { $cv[1]+=0.2; update(); }
-    if ( $k eq '6') { $cv[2]+=0.2; update(); }
-
-    if ( $k eq '1') { $cv[0]-=0.2; update(); }
-    if ( $k eq '2') { $cv[1]-=0.2; update(); }
-    if ( $k eq '3') { $cv[2]-=0.2; update(); }
-
-    printf "Coeffiction: %.2f %.2f %.2f\n", $cv[0],$cv[1],$cv[2];
 }
 
 sub quit
