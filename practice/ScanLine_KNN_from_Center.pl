@@ -49,13 +49,13 @@ INIT:
         my ($cy, $cx) = ( int($H/2), int($W/2) );
         my $ang = 0.0;
 
-        my $point;
+        my @points;
         my ($x, $y, $len);
 
         for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.1 )
         {
             $len = 0.0;
-            $point = undef;
+            @points = ();
             $prev = $mat->[$cy][$cx][0];
             $x = $cx;
             $y = $cy;
@@ -70,15 +70,36 @@ INIT:
                 #print "$x, $y, $k\n";
                 if ( $k > 30.0 )
                 {
-                    $point = [$x, $H-$y, 1.0];
+                    push @points, [$x, $H-$y, 1.0];
                 }
                 $prev = $mat->[$y][$x][0];
             }
 
-            ' get last point ';
-            if ( defined $point )
+            if ( $#points >= 0 )
             {
-                push @edges, $point;
+                if ( $#edges < 0 )
+                {
+                    ' get last point ';
+                    push @edges, $points[$#points];
+                }
+                else
+                {
+                    ' distance test ';
+                    my $min = 1000.0;
+                    my $good = $#points;
+                    my $dt;
+                    for my $i ( 0 .. $#points )
+                    {
+                        $dt = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
+                        if ( $dt < $min)
+                        {
+                            $good = $i;
+                            $min = $dt;
+                        }
+                    }
+
+                    push @edges, $points[$good];
+                }
             }
             else 
             {
