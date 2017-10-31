@@ -82,20 +82,11 @@ sub display
     my $block = [[]];
     my $sum = 0.0;
     my $far = 3;
-    if ($xi > 3)
-    {
-        for my $my (-$far .. $far)
-        {
-            for my $mx ( -$far .. $far )
-            {
-                $block->[$my+$far][$mx+$far] = $mat->[ $yi+$my ][ $xi+$mx ][0];
-                #printf "%-3d ", $block->[$my+2][$mx+2];
-                $sum += $block->[$my+$far][$mx+$far];
-            }
-            #print "\n";
-        }
-        #print "\n";
-    }
+
+    $block->[$my+$far][$mx+$far] = $mat->[ $yi+$my ][ $xi+$mx ][0];
+    #printf "%-3d ", $block->[$my+2][$mx+2];
+    $sum += $block->[$my+$far][$mx+$far];
+
 
     printf "%03d %.3f\n", $xi, $sum;
     $xi+=1.0 if $xi < $W-1;
