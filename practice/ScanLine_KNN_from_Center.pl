@@ -241,7 +241,7 @@ sub main
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH_TEST | GLUT_MULTISAMPLE );
     glutInitWindowSize($WIDTH, $HEIGHT);
     glutInitWindowPosition(100, 100);
-    $WinID = glutCreateWindow("DrawArrays");
+    $WinID = glutCreateWindow("Detect Contour");
     
     &init();
     glutDisplayFunc(\&display);
