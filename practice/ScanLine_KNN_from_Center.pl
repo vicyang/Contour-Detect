@@ -77,29 +77,28 @@ INIT:
 
             if ( $#points >= 0 )
             {
-                if ( $#edges < 0 )
-                {
+                # if ( $#edges < 0 )
+                # {
                     ' get last point ';
                     push @edges, $points[$#points];
-                }
-                else
-                {
-                    ' distance test ';
-                    my $min = 1000.0;
-                    my $good = $#points;
-                    my $dt;
-                    for my $i ( 0 .. $#points )
-                    {
-                        $dt = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
-                        if ( $dt < $min)
-                        {
-                            $good = $i;
-                            $min = $dt;
-                        }
-                    }
-
-                    push @edges, $points[$good];
-                }
+                # }
+                # else
+                # {
+                #     ' distance test ';
+                #     my $min = 1000.0;
+                #     my $good = $#points;
+                #     my $dt;
+                #     for my $i ( 0 .. $#points )
+                #     {
+                #         $dt = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
+                #         if ( $dt < $min)
+                #         {
+                #             $good = $i;
+                #             $min = $dt;
+                #         }
+                #     }
+                #     push @edges, $points[$good];
+                # }
             }
             else 
             {
