@@ -1,12 +1,14 @@
-use feature 'state';
-use IO::Handle;
+use utf8;
 use Imager;
-use List::Util qw/sum max/;
+use Encode;
+use feature 'state';
+use List::Util qw/sum max min/;
 use File::Slurp;
 use Time::HiRes qw/sleep time/;
+
 use OpenGL qw/ :all /;
 use OpenGL::Config;
-
+use IO::Handle;
 STDOUT->autoflush(1);
 
 BEGIN
@@ -14,6 +16,9 @@ BEGIN
     our $WinID;
     our $HEIGHT = 500;
     our $WIDTH  = 500;
+    our $show_w = 500;
+    our $show_h = 500;
+
     our ($rx, $ry, $rz) = (0.0, 0.0, 0.0);
     our $k_threshold = 20.0;
     our $d_threshold = 5.0;
