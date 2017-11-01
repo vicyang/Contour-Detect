@@ -21,7 +21,7 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "../sample2.jpg"; 
+    my $file = "../sample3.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     
@@ -68,7 +68,7 @@ INIT:
                 $curr = $mat->[$y][$x][0];
                 $k = abs($curr-$prev);
                 #print "$x, $y, $k\n";
-                if ( $k > 30.0 )
+                if ( $k > 20.0 )
                 {
                     push @points, [$x, $H-$y, 1.0];
                 }
@@ -77,28 +77,50 @@ INIT:
 
             if ( $#points >= 0 )
             {
-                # if ( $#edges < 0 )
-                # {
+                if ( $#edges < 2 )
+                {
                     ' get last point ';
                     push @edges, $points[$#points];
-                # }
-                # else
-                # {
-                #     ' distance test ';
-                #     my $min = 1000.0;
-                #     my $good = $#points;
-                #     my $dt;
-                #     for my $i ( 0 .. $#points )
-                #     {
-                #         $dt = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
-                #         if ( $dt < $min)
-                #         {
-                #             $good = $i;
-                #             $min = $dt;
-                #         }
-                #     }
-                #     push @edges, $points[$good];
-                # }
+                }
+                else
+                {
+                    ' distance test ';
+                    my $min = 1000.0;
+                    my $good = $#points;
+                    my $dt;
+                    my $len;
+                    my $vec1, $vec2;
+                    $vec1 = [ 
+                            $edges[$#edges]->[0] - $edges[$#edges-1]->[0],  
+                            $edges[$#edges]->[1] - $edges[$#edges-1]->[1]
+                            ];
+
+                    $len = sqrt($vec1->[0]**2 + $vec1->[1]**2);
+                    $vec1 = [ $vec1->[0]/$len, $vec1->[1]/$len ];
+
+
+                    for my $i ( 0 .. $#points )
+                    {
+                        $vec2 = [
+                                $points[$i]->[0] - $edges[$#edges]->[0],
+                                $points[$i]->[1] - $edges[$#edges]->[1]
+                                ];
+                        $len = sqrt($vec2->[0]**2 + $vec2->[1]**2);
+                        $vec2 = [ $vec2->[0]/$len, $vec2->[1]/$len ];
+
+                        $dt = sqrt(($vec2->[0]-$vec1->[0])**2 + ($vec2->[1]-$vec1->[1])**2);
+                        if ( $dt < $min)
+                        {
+                            $good = $i;
+                            $min = $dt;
+                        }
+                    }
+
+                    if ( $min < 1000.0 )
+                    {
+                        push @edges, $points[$good];
+                    }
+                }
             }
             else 
             {
@@ -131,12 +153,12 @@ sub display
     glDisableClientState(GL_COLOR_ARRAY);
 
     glPointSize(5.0);
-    glColor3f(1.0, 0.0,0.0);
-
     glBegin(GL_POINTS);
-    for my $e ( @edges )
+    glColor3f(1.0, 1.0, 0.0);
+    for my $e ( 0 .. $#edges )
     {
-        glVertex3f( @$e );
+        glColor3f( $e/$#edges, 1.0-$e/$#edges, 0.6 );
+        glVertex3f( @{$edges[$e]} );
     }
     glEnd();
     # printf "x:%d : %.2f %.2f %.2f\n", $xi, @{$mat->[$yi][$xi]};
