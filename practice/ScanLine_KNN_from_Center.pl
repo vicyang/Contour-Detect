@@ -21,7 +21,7 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "../sample3.jpg"; 
+    my $file = "../sample2.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     
@@ -98,7 +98,6 @@ INIT:
                     $len = sqrt($vec1->[0]**2 + $vec1->[1]**2);
                     $vec1 = [ $vec1->[0]/$len, $vec1->[1]/$len ];
 
-
                     for my $i ( 0 .. $#points )
                     {
                         $vec2 = [
@@ -116,7 +115,7 @@ INIT:
                         }
                     }
 
-                    if ( $min < 1000.0 )
+                    if ( $min < 50.0 )
                     {
                         push @edges, $points[$good];
                     }
