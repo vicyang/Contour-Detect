@@ -209,14 +209,15 @@ sub init
 sub reshape
 {
     my ($w, $h) = (shift, shift);
-    state $vthalf = 500.0;
-    state $hzhalf = 500.0;
     state $fa = 100.0;
+
+    my ($max, $min) = ( max( $H, $W ), min( $H, $W ) );
+    $max = $max - $max % 10;
 
     glViewport(0, 0, $w, $h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho( 0.0, $hzhalf, 0.0, $vthalf, 0.0, $fa*2.0); 
+    glOrtho( 0.0, $max, 0.0, $max, 0.0, $fa*2.0); 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(0.0,0.0,$fa, 0.0,0.0,0.0, 0.0,1.0, $fa);
