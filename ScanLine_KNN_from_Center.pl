@@ -23,7 +23,7 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "sample.jpg"; 
+    my $file = "sample3.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     
