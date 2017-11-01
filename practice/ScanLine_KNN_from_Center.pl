@@ -15,6 +15,7 @@ BEGIN
     our $HEIGHT = 500;
     our $WIDTH  = 500;
     our ($rx, $ry, $rz) = (0.0, 0.0, 0.0);
+    our $k_threshold = 20.0;
 }
 
 INIT:
@@ -41,10 +42,11 @@ INIT:
 
     our $xi, $yi;
     $yi = int($H/2);
-    scan_first_edge();
+    scan_edge();
 
-    sub scan_first_edge
+    sub scan_edge
     {
+        @edges = ();
         my $prev, $curr, $k, $y;
         my ($cy, $cx) = ( int($H/2), int($W/2) );
         my $ang = 0.0;
@@ -68,7 +70,7 @@ INIT:
                 $curr = $mat->[$y][$x][0];
                 $k = abs($curr-$prev);
                 #print "$x, $y, $k\n";
-                if ( $k > 20.0 )
+                if ( $k > $k_threshold )
                 {
                     push @points, [$x, $H-$y, 1.0];
                 }
@@ -77,7 +79,7 @@ INIT:
 
             if ( $#points >= 0 )
             {
-                if ( $#edges < 2 )
+                if ( $#edges < 1 )
                 {
                     ' get last point ';
                     push @edges, $points[$#points];
@@ -85,9 +87,13 @@ INIT:
                 else
                 {
                     ' distance test ';
-                    my $min = 1000.0;
-                    my $good = $#points;
-                    my $dt;
+                    my $dist;
+                    my $dist_min = 1000.0;
+                    my $dist_good = $#points;
+
+                    my $v_dt;
+                    my $vec_min = 1000.0;
+                    my $vec_good = $#points;
                     my $len;
                     my $vec1, $vec2;
                     $vec1 = [ 
@@ -98,7 +104,6 @@ INIT:
                     $len = sqrt($vec1->[0]**2 + $vec1->[1]**2);
                     $vec1 = [ $vec1->[0]/$len, $vec1->[1]/$len ];
 
-
                     for my $i ( 0 .. $#points )
                     {
                         $vec2 = [
@@ -108,18 +113,26 @@ INIT:
                         $len = sqrt($vec2->[0]**2 + $vec2->[1]**2);
                         $vec2 = [ $vec2->[0]/$len, $vec2->[1]/$len ];
 
-                        $dt = sqrt(($vec2->[0]-$vec1->[0])**2 + ($vec2->[1]-$vec1->[1])**2);
-                        if ( $dt < $min)
+                        $v_dt = sqrt(($vec2->[0]-$vec1->[0])**2 + ($vec2->[1]-$vec1->[1])**2);
+
+                        $dist = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
+
+                        if ( $v_dt < $vec_min)
                         {
-                            $good = $i;
-                            $min = $dt;
+                            $vec_good = $i;
+                            $vec_min = $v_dt;
+                        }
+
+                        if ( $dist < $dist_min)
+                        {
+                            $dist_good = $i;
+                            $dist_min = $dist;
                         }
                     }
 
-                    if ( $min < 1000.0 )
-                    {
-                        push @edges, $points[$good];
-                    }
+                    #push @edges, $points[$dist_good];
+                    if ( $dist_min < 5.0 ) { push @edges, $points[$dist_good]; }
+                    else                   { push @edges, $points[$vec_good];  }
                 }
             }
             else 
@@ -127,7 +140,6 @@ INIT:
                 print "did not find edge\n";
             }
         }
-
         export_svg( \@edges );
     }
 }
@@ -157,7 +169,7 @@ sub display
     glColor3f(1.0, 1.0, 0.0);
     for my $e ( 0 .. $#edges )
     {
-        glColor3f( $e/$#edges, 1.0-$e/$#edges, 0.6 );
+        glColor3f( 1.0-$e/$#edges, $e/$#edges, 0.6 );
         glVertex3f( @{$edges[$e]} );
     }
     glEnd();
@@ -209,6 +221,10 @@ sub hitkey
     our $WinID;
     my $k = lc(chr(shift));
     if ( $k eq 'q') { quit() }
+    if ( $k eq '-') { $k_threshold -= 1.0; scan_edge() }
+    if ( $k eq '=') { $k_threshold += 1.0; scan_edge() }
+
+    printf("%.2f\n", $k_threshold);
 }
 
 sub quit

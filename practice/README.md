@@ -26,10 +26,19 @@
     ![](./v01_1.png)  
     以及如果第一个边界点就定位到了其他区域，邻近方案就失去意义了。  
 
-  * center_v0.2  
+  * center_nearly_by_vec  
     在获得两个边界点e1, e2 之后，求出 e2-e1 的向量
     第三次的扫描点假设为 p1 p2 p3 ... , 依次 减去 e2得到新的向量，对两个向量长度归一化
     寻找距离最近的向量。
+
+  * center_nearly_by_dst  
+    配合向量方案，求出 p点集合 和 最后一个 e点的距离，找出最近点，设定一个阀值，  
+    如果达不到阀值，选择角度相近的点  
+    ```perl
+    if ( $dist_min < 5.0 ) { push @edges, $points[$dist_good]; }
+    else                   { push @edges, $points[$vec_good]; }
+    ```
+
 
 ### 相关知识
 * #### 最小二乘法  
