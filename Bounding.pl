@@ -62,7 +62,7 @@ INIT:
         my ($x, $y, $len);
         my $x0, $y0;
 
-        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.02 )
+        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.1 )
         {
             $len = 600.0;
             @points = ();
@@ -88,61 +88,61 @@ INIT:
 
             if ( $#points >= 0 )
             {
-                # if ( $#edges < 1 )
-                # {
+                if ( $#edges < 1 )
+                {
                     ' get first point ';
                     push @edges, $points[0];
-                # }
-                # else
-                # {
-                #     ' distance test ';
-                #     my $dist;
-                #     my $dist_min = 1000.0;
-                #     my $dist_good = $#points;
+                }
+                else
+                {
+                    ' distance test ';
+                    my $dist;
+                    my $dist_min = 1000.0;
+                    my $dist_good = 0;
 
-                #     my $v_dt;
-                #     my $vec_min = 1000.0;
-                #     my $vec_good = $#points;
-                #     my $len;
-                #     my $vec1, $vec2;
-                #     $vec1 = [ 
-                #             $edges[$#edges]->[0] - $edges[$#edges-1]->[0],  
-                #             $edges[$#edges]->[1] - $edges[$#edges-1]->[1]
-                #             ];
+                    my $v_dt;
+                    my $vec_min = 1000.0;
+                    my $vec_good = 0;
+                    my $len;
+                    my $vec1, $vec2;
+                    $vec1 = [ 
+                            $edges[$#edges]->[0] - $edges[$#edges-1]->[0],  
+                            $edges[$#edges]->[1] - $edges[$#edges-1]->[1]
+                            ];
 
-                #     $len = sqrt($vec1->[0]**2 + $vec1->[1]**2);
-                #     $vec1 = [ $vec1->[0]/$len, $vec1->[1]/$len ];
+                    $len = sqrt($vec1->[0]**2 + $vec1->[1]**2);
+                    $vec1 = [ $vec1->[0]/$len, $vec1->[1]/$len ];
 
-                #     for my $i ( 0 .. $#points )
-                #     {
-                #         $vec2 = [
-                #                 $points[$i]->[0] - $edges[$#edges]->[0],
-                #                 $points[$i]->[1] - $edges[$#edges]->[1]
-                #                 ];
-                #         $len = sqrt($vec2->[0]**2 + $vec2->[1]**2);
-                #         $vec2 = [ $vec2->[0]/$len, $vec2->[1]/$len ];
+                    for my $i ( 0 .. $#points )
+                    {
+                        $vec2 = [
+                                $points[$i]->[0] - $edges[$#edges]->[0],
+                                $points[$i]->[1] - $edges[$#edges]->[1]
+                                ];
+                        $len = sqrt($vec2->[0]**2 + $vec2->[1]**2);
+                        $vec2 = [ $vec2->[0]/$len, $vec2->[1]/$len ];
 
-                #         $v_dt = sqrt(($vec2->[0]-$vec1->[0])**2 + ($vec2->[1]-$vec1->[1])**2);
+                        $v_dt = sqrt(($vec2->[0]-$vec1->[0])**2 + ($vec2->[1]-$vec1->[1])**2);
 
-                #         $dist = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
+                        $dist = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
 
-                #         if ( $v_dt < $vec_min)
-                #         {
-                #             $vec_good = $i;
-                #             $vec_min = $v_dt;
-                #         }
+                        if ( $v_dt < $vec_min)
+                        {
+                            $vec_good = $i;
+                            $vec_min = $v_dt;
+                        }
 
-                #         if ( $dist < $dist_min)
-                #         {
-                #             $dist_good = $i;
-                #             $dist_min = $dist;
-                #         }
-                #     }
+                        if ( $dist < $dist_min)
+                        {
+                            $dist_good = $i;
+                            $dist_min = $dist;
+                        }
+                    }
 
-                #     #push @edges, $points[$dist_good];
-                #     if ( $dist_min < $d_threshold ) { push @edges, $points[$dist_good]; }
-                #     else                   { push @edges, $points[$vec_good];  }
-                # }
+                    #push @edges, $points[$dist_good];
+                    if ( $dist_min < $d_threshold ) { push @edges, $points[$dist_good]; }
+                    else                   { push @edges, $points[$vec_good];  }
+                }
             }
             else 
             {
