@@ -4,6 +4,7 @@ use Encode;
 use feature 'state';
 use Math::Trig;
 use List::Util qw/sum max min/;
+use Data::Dumper;
 use File::Slurp;
 use Time::HiRes qw/sleep time/;
 
@@ -60,7 +61,8 @@ INIT:
 
         my @points;
         my ($x, $y, $len);
-        my $x0, $y0;
+        my $e_mat, $t_mat;
+        my $best, $min;
 
         for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.1 )
         {
@@ -86,62 +88,62 @@ INIT:
                 $prev = $curr;
             }
 
+            my $t_mat;
             if ( $#points >= 0 )
             {
                 if ( $#edges < 1 )
                 {
                     ' get first point ';
                     push @edges, $points[0];
+                    
+                    @$e_mat = ();
+
+                    for my $si ( -100 .. 100 ) {
+                    for my $sj ( -100 .. 100 ) {
+                        push @$e_mat, $mat->[ $points[0]->[1]+$si ][ $points[0]->[0]+$sj ][0]
+                    }
+                    }
+                    #@$e_mat = sort @$e_mat;
                 }
                 else
                 {
-                    ' distance test ';
-                    my $dist;
-                    my $dist_min = 1000.0;
-                    my $dist_good = 0;
-
-                    my $v_dt;
-                    my $vec_min = 1000.0;
-                    my $vec_good = 0;
-                    my $len;
-                    my $vec1, $vec2;
-                    $vec1 = [ 
-                            $edges[$#edges]->[0] - $edges[$#edges-1]->[0],  
-                            $edges[$#edges]->[1] - $edges[$#edges-1]->[1]
-                            ];
-
-                    $len = sqrt($vec1->[0]**2 + $vec1->[1]**2);
-                    $vec1 = [ $vec1->[0]/$len, $vec1->[1]/$len ];
-
-                    for my $i ( 0 .. $#points )
+                    ' similar test ';
+                    $min = 1000000.0;
+                    $best = 0;
+                    for my $pi ( 0 .. $#points )
                     {
-                        $vec2 = [
-                                $points[$i]->[0] - $edges[$#edges]->[0],
-                                $points[$i]->[1] - $edges[$#edges]->[1]
-                                ];
-                        $len = sqrt($vec2->[0]**2 + $vec2->[1]**2);
-                        $vec2 = [ $vec2->[0]/$len, $vec2->[1]/$len ];
-
-                        $v_dt = sqrt(($vec2->[0]-$vec1->[0])**2 + ($vec2->[1]-$vec1->[1])**2);
-
-                        $dist = sqrt(($points[$i]->[0]-$edges[$#edges]->[0])**2 + ($points[$i]->[1]-$edges[$#edges]->[1])**2);
-
-                        if ( $v_dt < $vec_min)
-                        {
-                            $vec_good = $i;
-                            $vec_min = $v_dt;
+                        @$t_mat = ();
+                        for my $si ( -100 .. 100 ) {
+                        for my $sj ( -100 .. 100 ) {
+                            push @$t_mat, $mat->[ $points[$pi]->[1]+$si ][ $points[$pi]->[0]+$sj ][0]
                         }
+                        }
+                        #@$t_mat = sort @$t_mat;
 
-                        if ( $dist < $dist_min)
+                        my $sum = 0;
+                        for my $mi ( 0 .. $#$e_mat )
                         {
-                            $dist_good = $i;
-                            $dist_min = $dist;
+                            $sum += ($e_mat->[$mi] - $t_mat->[$mi]) ** 2;
+                        }
+                        $sum = sqrt($sum);
+                        #printf "%.3f\n", $sum;
+
+                        if ( $sum < $min )
+                        {
+                            $best = $pi;
+                            $min = $sum;
                         }
                     }
 
-                    #push @edges, $points[$dist_good];
-                    if ( $dist_min < $d_threshold ) { push @edges, $points[$dist_good]; }
-                    else                   { push @edges, $points[$vec_good];  }
+                    @$e_mat = ();
+                    for my $si ( -100 .. 100 ) {
+                    for my $sj ( -100 .. 100 ) {
+                        push @$e_mat, $mat->[ $points[$best]->[1]+$si ][ $points[$best]->[0]+$sj ][0]
+                    }
+                    }
+                    #@$e_mat = sort @$e_mat;
+
+                    push @edges, $points[$best];
                 }
             }
             else 
