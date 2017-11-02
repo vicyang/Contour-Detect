@@ -60,7 +60,7 @@ INIT:
         my @points;
         my ($x, $y, $len);
 
-        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.05 )
+        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.1 )
         {
             $len = 0.0;
             @points = ();
@@ -208,16 +208,17 @@ sub init
 
 sub reshape
 {
-    my ($w, $h) = (shift, shift);
     state $fa = 100.0;
+    my ($w, $h) = (shift, shift);
+    my $p_max = max( $H, $W );
+    my $w_min = min( $h, $w );
 
-    my ($max, $min) = ( max( $H, $W ), min( $H, $W ) );
-    $max = $max - $max % 10;
+    $p_max = $p_max - $p_max % 10;  '取整';
 
-    glViewport(0, 0, $w, $h);
+    glViewport(0, 0, $w_min, $w_min);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho( 0.0, $max, 0.0, $max, 0.0, $fa*2.0); 
+    glOrtho( 0.0, $p_max, 0.0, $p_max, 0.0, $fa*2.0); 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(0.0,0.0,$fa, 0.0,0.0,0.0, 0.0,1.0, $fa);
