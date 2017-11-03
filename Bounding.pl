@@ -60,14 +60,15 @@ INIT:
         my $ang = 0.0;
 
         my @points;
+        my @vals;
         my ($x, $y, $len);
-        my $e_mat, $t_mat;
-        my $best, $min;
+        my ($best, $min, $max);
 
-        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.1 )
+        for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.05 )
         {
             $len = 600.0;
             @points = ();
+            @vals = ();
             $prev = undef;
 
             while ( $len > 1.0 )
@@ -76,80 +77,26 @@ INIT:
                 $x = $cx + $len * cos( $ang );
                 $y = $cy + $len * sin( $ang );
                 next if ( $y > $H-5 or $x > $W-5 or $x < 0.0 or $y < 0.0);
-
-                $curr = $mat->[$y][$x][0];
-                if (not defined $prev) { $prev = $curr; next; }
-
-                $k = abs($curr-$prev);
-                if ( $k > $k_threshold )
-                {
-                    push @points, [$x, $H-$y, 1.0];
-                }
-                $prev = $curr;
+                push @points, [$x, $H-$y, 1.0];
+                push @vals, $mat->[$y][$x][0];
             }
 
-            my $t_mat;
-            if ( $#points >= 0 )
+            my ($sum1, $sum2);
+            $max = 0.0;
+            $best = undef;
+            for my $i ( 10 .. $#points-10 )
             {
-                if ( $#edges < 1 )
+                $sum1 = sum( @vals[ $i-10 .. $i ] );
+                $sum2 = sum( @vals[ $i .. $i+10 ] );
+                if ( abs($sum2-$sum1) > $max )
                 {
-                    ' get first point ';
-                    push @edges, $points[0];
-                    
-                    @$e_mat = ();
-
-                    for my $si ( -10 .. 10 ) {
-                    for my $sj ( -10 .. 10 ) {
-                        push @$e_mat, $mat->[ $points[0]->[1]+$si ][ $points[0]->[0]+$sj ][0]
-                    }
-                    }
-                    #@$e_mat = sort @$e_mat;
-                }
-                else
-                {
-                    ' similar test ';
-                    $min = 1000000.0;
-                    $best = 0;
-                    for my $pi ( 0 .. $#points )
-                    {
-                        @$t_mat = ();
-                        for my $si ( -10 .. 10 ) {
-                        for my $sj ( -10 .. 10 ) {
-                            push @$t_mat, $mat->[ $points[$pi]->[1]+$si ][ $points[$pi]->[0]+$sj ][0]
-                        }
-                        }
-                        #@$t_mat = sort @$t_mat;
-
-                        my $sum = 0;
-                        for my $mi ( 0 .. $#$e_mat )
-                        {
-                            $sum += ($e_mat->[$mi] - $t_mat->[$mi]) ** 2;
-                        }
-                        $sum = sqrt($sum);
-                        #printf "%.3f\n", $sum;
-
-                        if ( $sum < $min )
-                        {
-                            $best = $pi;
-                            $min = $sum;
-                        }
-                    }
-
-                    @$e_mat = ();
-                    for my $si ( -10 .. 10 ) {
-                    for my $sj ( -10 .. 10 ) {
-                        push @$e_mat, $mat->[ $points[$best]->[1]+$si ][ $points[$best]->[0]+$sj ][0]
-                    }
-                    }
-                    #@$e_mat = sort @$e_mat;
-
-                    push @edges, $points[$best];
+                    $max = abs($sum2-$sum1);
+                    $best = $i;
                 }
             }
-            else 
-            {
-                print "did not find edge\n";
-            }
+
+            push @edges, $points[$best];
+            # last;
         }
         export_svg( \@edges );
     }
@@ -180,7 +127,7 @@ sub display
     glColor3f(1.0, 1.0, 0.0);
     for my $e ( 0 .. $#edges )
     {
-        glColor3f( 1.0-$e/$#edges, $e/$#edges, 0.6 );
+        glColor3f( 1.0-$e/($#edges+1), $e/($#edges+1), 0.6 ); ' +1 防止除0错误';
         glVertex3f( @{$edges[$e]} );
     }
     glEnd();
