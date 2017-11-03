@@ -1,6 +1,11 @@
-* ### ScanLine.pl  
+* ### ScanLine.pl   
   扫描线尝试  
 
+* ### Summary.pl  
+  统计频率较高的颜色值并对相似的颜色进行着色。  
+  旧的代码没有考虑到外部变量 $b 会影响到sort内置变量，导致结果不稳定  
+  `@sort_key = sort { $hash->{$b} <=> $hash->{$a}  } keys %$hash;`
+  
 * ### ScanLine_KNN_ALL_RGB.pl  
   扫描上下左右所有边界  
 
