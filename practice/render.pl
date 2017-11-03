@@ -19,7 +19,7 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "sample.jpg"; 
+    my $file = "../sample.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     our @cv = (1.0, 2.0, 1.0);
