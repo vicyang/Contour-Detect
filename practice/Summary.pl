@@ -149,8 +149,8 @@ sub hitkey
     if ( $k eq 'q') { quit() }
     if ( $k eq '-') { $k_threshold -= 1.0; high_freq_points() }
     if ( $k eq '=') { $k_threshold += 1.0; high_freq_points() }
-    if ( $k eq '[') { $index -= 1; high_freq_points() }
-    if ( $k eq ']') { $index += 1; high_freq_points() }
+    if ( $k eq '[') { $index -= 10; high_freq_points() }
+    if ( $k eq ']') { $index += 10; high_freq_points() }
     printf("%d %.2f\n", $index, $k_threshold );
 }
 
@@ -206,13 +206,9 @@ sub load_pixels
         }
     }
 
-    @sort_key = sort { $hash->{$a} <=> $hash->{$a} || $a cmp $b  } keys %$hash;
+    @sort_key = sort { $hash->{$a} <=> $hash->{$b} || $a cmp $b  } keys %$hash;
 
     print $sort_key[0] ,"\n";
     print $sort_key[-1] ,"\n";
-
-    for my $k ( @sort_key )
-    {
-        printf "%-12s %d\n", $k, $hash->{$k};
-    }
+    printf "Count: %d\n", $#sort_key;
 }
