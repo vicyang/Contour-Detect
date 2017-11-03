@@ -98,8 +98,8 @@ INIT:
                     
                     @$e_mat = ();
 
-                    for my $si ( -100 .. 100 ) {
-                    for my $sj ( -100 .. 100 ) {
+                    for my $si ( -10 .. 10 ) {
+                    for my $sj ( -10 .. 10 ) {
                         push @$e_mat, $mat->[ $points[0]->[1]+$si ][ $points[0]->[0]+$sj ][0]
                     }
                     }
@@ -113,8 +113,8 @@ INIT:
                     for my $pi ( 0 .. $#points )
                     {
                         @$t_mat = ();
-                        for my $si ( -100 .. 100 ) {
-                        for my $sj ( -100 .. 100 ) {
+                        for my $si ( -10 .. 10 ) {
+                        for my $sj ( -10 .. 10 ) {
                             push @$t_mat, $mat->[ $points[$pi]->[1]+$si ][ $points[$pi]->[0]+$sj ][0]
                         }
                         }
@@ -136,8 +136,8 @@ INIT:
                     }
 
                     @$e_mat = ();
-                    for my $si ( -100 .. 100 ) {
-                    for my $sj ( -100 .. 100 ) {
+                    for my $si ( -10 .. 10 ) {
+                    for my $sj ( -10 .. 10 ) {
                         push @$e_mat, $mat->[ $points[$best]->[1]+$si ][ $points[$best]->[0]+$sj ][0]
                     }
                     }
