@@ -30,6 +30,7 @@ INIT:
     ' Load curves ';
     my $str = read_file( "contour.svg" ) or die $!;
     our @points;
+    our @newpts;
     my ($x, $y);
 
     if ($str =~ /points="([^"]+)"/)
@@ -43,6 +44,34 @@ INIT:
     else
     {
         warn "something wrong !\n";
+        exit;
+    }
+
+    ' 直线点合并 ';
+    my $nid = 0;
+    my $oid = 1;
+    my ($x1, $y1, $x2, $y2);
+    push @newpts, $points[0];
+    while ( 1 )
+    {
+        $x1 = $points[$oid]->[0] - $newpts[$nid]->[0];
+        $y1 = $points[$oid]->[1] - $newpts[$nid]->[1];
+
+        $x2 = $points[$oid+1]->[0] - $points[$oid]->[0];
+        $y2 = $points[$oid+1]->[1] - $points[$oid]->[1];
+
+        if ( sqrt(($y2-$y1)**2 + ($x2-$x1)**2) < 10.0 )
+        {
+            $oid++;
+        }
+        else
+        {
+            push @newpts, $points[$oid];
+            $oid++;
+            $nid++;
+        }
+
+        last if ($oid > $#points-2);
     }
 }
 
@@ -50,9 +79,11 @@ INIT:
 
 sub display
 {
-    our (@points);
+    our (@points, @newpts);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+    glColor4f(0.5,0.5,0.5, 0.5);
     glBegin(GL_POINTS);
     for my $e ( 0 .. $#points )
     {
@@ -60,7 +91,17 @@ sub display
         glVertex3f( @{$points[$e]} );
     }
     glEnd();
-    # printf "x:%d : %.2f %.2f %.2f\n", $xi, @{$mat->[$yi][$xi]};
+
+    glColor4f(0.5, 0.5, 0.5, 1.0);
+    glPointSize(5.0);
+    glBegin(GL_POINTS);
+    for my $e ( 0 .. $#newpts )
+    {
+        glColor3f( 1.0-$e/($#newpts+1), $e/($#newpts+1), 0.6 ); ' +1 防止除0错误';
+        glVertex3f( $newpts[$e]->[0],$newpts[$e]->[1], 1.0 );
+    }
+    glEnd();
+    glPointSize(1.0);
 
     glutSwapBuffers();
 }
@@ -83,8 +124,13 @@ sub init
 {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_POINT_SMOOTH);
     glPointSize(1.0);
     glLineWidth(1.0);
+
+    
 }
 
 sub reshape
