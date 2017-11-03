@@ -30,7 +30,7 @@ INIT:
 {
     ' Load picture ';
 
-    my $file = "sample3.jpg"; 
+    my $file = "sample2.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     
@@ -62,7 +62,7 @@ INIT:
         my @points;
         my @vals;
         my ($x, $y, $len);
-        my ($best, $min, $max);
+        my ($best, $prev, $min, $max);
 
         for ( $ang = 0.0 ; $ang <= 6.28; $ang += 0.05 )
         {
@@ -86,7 +86,7 @@ INIT:
             $best = undef;
             for my $i ( 10 .. $#points-10 )
             {
-                $sum1 = sum( @vals[ $i-10 .. $i ] );
+                $sum1 = sum( @vals[ $i-10 .. $i ] ) ;
                 $sum2 = sum( @vals[ $i .. $i+10 ] );
                 if ( abs($sum2-$sum1) > $max )
                 {
