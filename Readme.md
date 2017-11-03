@@ -30,4 +30,12 @@ Convolution
     不足之处：  
     ![Bounding_V01_1.jpg](./Bounding_V01_1.jpg)  
 
-    
+    解决方案：  
+    判断边界的一方是否接近背景的白色或者是否接近起点颜色
+    `if ( abs($sum2-$sum1) > $max`  
+    改为  
+    `if ( abs($sum2-$sum1) > $max and $vals[$i-5] > 200 )`  
+
+    效果：  
+    ![Bounding_V01_2.jpg](Bounding_V01_2.jpg)  
+

@@ -88,7 +88,7 @@ INIT:
             {
                 $sum1 = sum( @vals[ $i-10 .. $i ] ) ;
                 $sum2 = sum( @vals[ $i .. $i+10 ] );
-                if ( abs($sum2-$sum1) > $max )
+                if ( abs($sum2-$sum1) > $max and $vals[$i-5] > 200 )
                 {
                     $max = abs($sum2-$sum1);
                     $best = $i;
