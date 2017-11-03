@@ -21,7 +21,7 @@ BEGIN
     our $show_h = 500;
 
     our ($rx, $ry, $rz) = (0.0, 0.0, 0.0);
-    our $k_threshold = 20.0;
+    our $k_threshold = 0.25;
     our $d_threshold = 50.0;
 }
 
@@ -47,41 +47,38 @@ INIT:
         exit;
     }
 
+    merge_straight_line();
+
     ' 直线点合并 ';
-    my $nid = 0;
-    my $oid = 1;
-    my ($x1, $y1, $x2, $y2, $len);
-    push @newpts, $points[0];
-    while ( 1 )
+    sub merge_straight_line
     {
-        $x1 = $points[$oid]->[0] - $newpts[$nid]->[0];
-        $y1 = $points[$oid]->[1] - $newpts[$nid]->[1];
-
-        $len = sqrt($x1**2+$y1**2);
-        $x1 /= $len;
-        $y1 /= $len;
-
-        $x2 = $points[$oid+1]->[0] - $points[$oid]->[0];
-        $y2 = $points[$oid+1]->[1] - $points[$oid]->[1];
-
-        $len = sqrt($x2**2+$y2**2);
-        $x2 /= $len;
-        $y2 /= $len;
-        printf "%.3f\n", sqrt(($y2-$y1)**2 + ($x2-$x1)**2);
-
-        if ( sqrt(($y2-$y1)**2 + ($x2-$x1)**2) < 0.25 )
-        #if ( abs($x1/$y1-$x2/$y2) < 2.0 )
+        our (@newpts, @points, $k_threshold);
+        my $nid = 0;
+        my $oid = 1;
+        my ($x1, $y1, $x2, $y2, $len);
+        @newpts = ();
+        push @newpts, $points[0];
+        while ( 1 )
         {
-            $oid++;
-        }
-        else
-        {
-            push @newpts, $points[$oid];
-            $oid++;
-            $nid++;
-        }
+            $x1 = $points[$oid]->[0] - $newpts[$nid]->[0];
+            $y1 = $points[$oid]->[1] - $newpts[$nid]->[1];
 
-        last if ($oid > $#points-2);
+            $x2 = $points[$oid+1]->[0] - $points[$oid]->[0];
+            $y2 = $points[$oid+1]->[1] - $points[$oid]->[1];
+
+            if ( abs(atan2($y1, $x1)-atan2($y2, $x2)) < $k_threshold )
+            {
+                $oid++;
+            }
+            else
+            {
+                push @newpts, $points[$oid];
+                $oid++;
+                $nid++;
+            }
+
+            last if ($oid >= $#points-1);
+        }
     }
 }
 
@@ -139,8 +136,6 @@ sub init
     glEnable(GL_POINT_SMOOTH);
     glPointSize(1.0);
     glLineWidth(1.0);
-
-    
 }
 
 sub reshape
@@ -164,10 +159,10 @@ sub hitkey
     our ($WinID, $k_threshold, $d_threshold);
     my $k = lc(chr(shift));
     if ( $k eq 'q') { quit() }
-    if ( $k eq '-') { $k_threshold -= 1.0; scan_edge() }
-    if ( $k eq '=') { $k_threshold += 1.0; scan_edge() }
-    if ( $k eq '[') { $d_threshold -= 1.0; scan_edge() }
-    if ( $k eq ']') { $d_threshold += 1.0; scan_edge() }
+    if ( $k eq '-') { $k_threshold -= 0.01; merge_straight_line() }
+    if ( $k eq '=') { $k_threshold += 0.01; merge_straight_line() }
+    if ( $k eq '[') { $d_threshold -= 0.01; merge_straight_line() }
+    if ( $k eq ']') { $d_threshold += 0.01; merge_straight_line() }
     printf("%.2f %.2f\n", $k_threshold, $d_threshold);
 }
 
