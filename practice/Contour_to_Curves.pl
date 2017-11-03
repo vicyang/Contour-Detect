@@ -79,6 +79,8 @@ INIT:
 
             last if ($oid >= $#points-1);
         }
+
+        export_svg( \@newpts, "contour_new.svg" );
     }
 }
 
@@ -194,7 +196,7 @@ sub main
 sub export_svg
 {
     our ($H);
-    my $pts = shift;
+    my ($pts, $file) = (shift, shift);
     my $head = '<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">';
     my $body = '<polyline points="';
 
@@ -206,5 +208,5 @@ sub export_svg
 
     my $end = '</svg>';
 
-    write_file("contour.svg", join("\n", $head, $body, $end) );
+    write_file($file, join("\n", $head, $body, $end) );
 }
