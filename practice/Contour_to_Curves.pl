@@ -50,17 +50,27 @@ INIT:
     ' 直线点合并 ';
     my $nid = 0;
     my $oid = 1;
-    my ($x1, $y1, $x2, $y2);
+    my ($x1, $y1, $x2, $y2, $len);
     push @newpts, $points[0];
     while ( 1 )
     {
         $x1 = $points[$oid]->[0] - $newpts[$nid]->[0];
         $y1 = $points[$oid]->[1] - $newpts[$nid]->[1];
 
+        $len = sqrt($x1**2+$y1**2);
+        $x1 /= $len;
+        $y1 /= $len;
+
         $x2 = $points[$oid+1]->[0] - $points[$oid]->[0];
         $y2 = $points[$oid+1]->[1] - $points[$oid]->[1];
 
-        if ( sqrt(($y2-$y1)**2 + ($x2-$x1)**2) < 10.0 )
+        $len = sqrt($x2**2+$y2**2);
+        $x2 /= $len;
+        $y2 /= $len;
+        printf "%.3f\n", sqrt(($y2-$y1)**2 + ($x2-$x1)**2);
+
+        if ( sqrt(($y2-$y1)**2 + ($x2-$x1)**2) < 0.25 )
+        #if ( abs($x1/$y1-$x2/$y2) < 2.0 )
         {
             $oid++;
         }
