@@ -23,14 +23,14 @@ BEGIN
 
     our ($rx, $ry, $rz) = (0.0, 0.0, 0.0);
     our $k_threshold = 20.0;
-    our $d_threshold = 5.0;
+    our $d_threshold = 50.0;
 }
 
 INIT:
 {
     ' Load picture ';
 
-    my $file = "sample2.jpg"; 
+    my $file = "sample3.jpg"; 
     our $img = Imager->new();
     our ($H, $W);
     
@@ -88,7 +88,7 @@ INIT:
             {
                 $sum1 = sum( @vals[ $i-10 .. $i ] ) ;
                 $sum2 = sum( @vals[ $i .. $i+10 ] );
-                if ( abs($sum2-$sum1) > $max and $vals[$i-5] > 200 )
+                if ( abs($sum2-$sum1) > $max and abs($vals[$i-5] - $vals[5]) < $d_threshold )
                 {
                     $max = abs($sum2-$sum1);
                     $best = $i;
