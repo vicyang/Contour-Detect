@@ -95,7 +95,7 @@ INIT:
                 }
             }
 
-            push @edges, $points[$best];
+            push @edges, $points[$best-1];
             # last;
         }
         export_svg( \@edges );
