@@ -1,9 +1,6 @@
 * ### ScanLine.pl  
   扫描线尝试  
 
-* ### ScanLine_KNN.pl  
-  扫描边界  
-
 * ### ScanLine_KNN_ALL_RGB.pl  
   扫描上下左右所有边界  
 
