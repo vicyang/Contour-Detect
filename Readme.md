@@ -6,4 +6,5 @@ Convolution
 ### Branch  
 
 * Bounding  
-  Create bouding box from outside  
+  由外而内线段扫描，寻找边界点  
+  效果并不理想  
